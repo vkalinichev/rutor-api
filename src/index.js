@@ -61,9 +61,5 @@ const parse = function( html ) {
         } )
     } )
 
-    console.log( results )
-
     return results
 }
-
-exports.search( 'matrix 1999 1080p' )
