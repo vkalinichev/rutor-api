@@ -31,5 +31,20 @@
   },
   "engines": {
     "node": ">=4"
+  },
+  "ava": {
+    "files": [ "src/*.test.js" ],
+    "source": [
+      "src/*.js",
+      "!lib/**/*"
+    ],
+    "concurrency": 5,
+    "failFast": true,
+    "tap": true,
+    "powerAssert": false,
+    "require": [
+      "babel-register"
+    ],
+    "babel": "inherit"
   }
 }
