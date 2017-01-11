@@ -3,8 +3,8 @@
 const request = require( 'request' )
 const cheerio = require( 'cheerio' )
 
-let options = {
-    base: 'http://tor-ru.net/search/',
+let searchOptions = {
+    base: 'http://new-ru.org/search/',
     page: 0,
     category: 0,
     method: 100,
@@ -12,7 +12,7 @@ let options = {
 }
 
 exports.config = ( newOptions ) =>
-    options = Object.assign( {}, options, newOptions )
+    searchOptions = Object.assign( {}, searchOptions, newOptions )
 
 exports.search = ( needle ) =>
     fetch( getFullUrl( needle ) )
@@ -28,9 +28,9 @@ const fetch = ( url ) =>
     )
 
 const getBaseUrl = () => {
-    const { page, category, method, order } = options
-    if ( !page && !category && !method && !order ) return options.base
-    return options.base + `${ page }/${ category }/${ method }/${ order }/`
+    const { page, category, method, order } = searchOptions
+    if ( !page && !category && !method && !order ) return searchOptions.base
+    return searchOptions.base + `${ page }/${ category }/${ method }/${ order }/`
 }
 
 const getFullUrl = ( needle ) =>
@@ -41,26 +41,20 @@ const parse = function( html ) {
     let results = []
     let $ = cheerio.load( html )
 
-    $( '#index' ).find( 'tr' ).each( function( i, elem ) {
+    $( '#index' ).find( 'tr:not(.backgr)' ).each( function( i, elem ) {
+        const $td = $( elem ).find( 'td' )
+        const date = $( $td[0] ).text()
+        const $links = $( $td[1] ).find( 'a' )
+        const size = $( $td[ $td.length - 2 ] ).html().replace( '&#xA0;', ' ' )
+        const $peers = $( $td[ $td.length - 1 ] )
+        const seeds = +$peers.find( '.green' ).text()
+        const leaches = +$peers.find( '.red' ).text()
+        const magnet = $( $links[0] ).attr( 'href' )
+        const torrent = $( $links[1] ).attr( 'href' )
+        const title = $( $links[2] ).text()
+        const url = $( $links[2] ).attr( 'href' )
 
-        if ( $( elem ).attr( 'class' ) === 'backgr' ) return true
-
-        const td = $( elem ).find( 'td' )
-        const date = $( td.get( 0 ) )
-        const link = date.next()
-        const comments = link.next()
-        const size = td.length === 4 ? link.next() : comments.next()
-        const peers = size.next()
-
-        results.push( {
-            date: date.text(),
-            magnet: $( link.find( 'a' ).get( 1 ) ).attr( 'href' ),
-            title: $( link.find( 'a' ).get( 2 ) ).text(),
-            size: size.html().replace( '&#xA0;', ' ' ),
-            seeds: parseInt( $( peers ).find( 'span.green' ).text() ),
-            peers: parseInt( $( peers ).find( 'span.red' ).text() ),
-            url: options.base + $( link.find( 'a' ).get( 2 ) ).attr( 'href' )
-        } )
+        results.push( { date, title, size, magnet, torrent, url, seeds, leaches } )
     } )
 
     return results
