@@ -41,17 +41,18 @@ const parse = function( html ) {
 
     return $( '#index' ).find( 'tr:not(.backgr)' ).map( ( i, elem ) => {
         const $td = $( elem ).find( 'td' )
-        const date = $( $td[0] ).text()
         const $links = $( $td[1] ).find( 'a' )
-        const size = $( $td[ $td.length - 2 ] ).html().replace( '&#xA0;', ' ' )
         const $peers = $( $td[ $td.length - 1 ] )
-        const seeds = +$peers.find( '.green' ).text()
-        const leaches = +$peers.find( '.red' ).text()
-        const magnet = $( $links[0] ).attr( 'href' )
-        const torrent = $( $links[1] ).attr( 'href' )
-        const title = $( $links[2] ).text()
-        const url = $( $links[2] ).attr( 'href' )
 
-        return { date, title, size, magnet, torrent, url, seeds, leaches }
+        return {
+            title: $( $links[ 2 ] ).text(),
+            date: $( $td[ 0 ] ).text(),
+            size: $( $td[ $td.length - 2 ] ).html().replace( '&#xA0;', ' ' ),
+            url: $( $links[ 2 ] ).attr( 'href' ),
+            magnet: $( $links[ 0 ] ).attr( 'href' ),
+            torrent: $( $links[ 1 ] ).attr( 'href' ),
+            seeds: parseInt( $peers.find( '.green' ).text() ),
+            leaches: parseInt( $peers.find( '.red' ).text() )
+        }
     } ).get()
 }
