@@ -37,11 +37,9 @@ const getFullUrl = ( needle ) =>
     getBaseUrl() + encodeURIComponent( needle )
 
 const parse = function( html ) {
-
-    let results = []
     let $ = cheerio.load( html )
 
-    $( '#index' ).find( 'tr:not(.backgr)' ).each( function( i, elem ) {
+    return $( '#index' ).find( 'tr:not(.backgr)' ).map( ( i, elem ) => {
         const $td = $( elem ).find( 'td' )
         const date = $( $td[0] ).text()
         const $links = $( $td[1] ).find( 'a' )
@@ -54,8 +52,6 @@ const parse = function( html ) {
         const title = $( $links[2] ).text()
         const url = $( $links[2] ).attr( 'href' )
 
-        results.push( { date, title, size, magnet, torrent, url, seeds, leaches } )
-    } )
-
-    return results
+        return { date, title, size, magnet, torrent, url, seeds, leaches }
+    } ).get()
 }
